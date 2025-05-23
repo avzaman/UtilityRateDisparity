@@ -1,0 +1,168 @@
+Individual tax income by zipcode
+https://catalog.data.gov/dataset/zip-code-data 
+https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-statistics-zip-code-data-soi
+Need to use 2020 data cuz that's what's available for utility rates:
+https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-statistics-2020-zip-code-data-soi
+
+
+Utitlity rates by zipcode
+https://catalog.data.gov/dataset/u-s-electric-utility-companies-and-rates-look-up-by-zipcode-2020
+
+So idea is to clean and do calculations on these two data sets seperately, then join by zipcode to find correlations.
+
+
+
+NEW PLAN
+-----------------------------------------------------
+USE US CENSUS DATA WITH UTILITY DATA instead.
+
+preprocess utility data
+
+Visualize the distribution of utility prices
+Visualize the distribution of incomes
+
+Define low income
+
+See where are the highest and lowest utility prices are
+See where the highest and lowest income zips are
+
+Run a correlation on the two sets
+Run classification on counties based on uszips
+-----------------------------------------------------------
+THE  UTILITIES IS FOR ELECTRIC ONLY
+
+The data is also by utility and not by zip so need to condense utilities into zips
+
+
+About 50 million Americans have household incomes below 125% of poverty, including more than 15 million children. In 2022, household incomes below 125% of poverty correspond to annual incomes below $34,500 for a family of four or $17,500 for an individual.
+
+So median household size in America is 3 residents. Poverty line for household of that size $21,960. So all calculations are gonna based on 20k being poverty line because the data is divided in 5k chunks.
+https://aspe.hhs.gov/2021-poverty-guidelines
+https://usafacts.org/data/topics/people-society/population-and-demographics/population-data/average-family-size/#:~:text=In%202022%2C%20there%20were%20an,a%20family%2C%20unchanged%20from%202021.
+
+IOU mean investor owned utilities!!!!
+https://www.eia.gov/todayinenergy/detail.php?id=40913
+
+The rate is dollar/killowat hour
+
+In order to plot on map using geopandas, res_rate needs to be convertewd to integers instead of floats, so we scale the floats up by 10^3 and truncate some decimal values
+
+In order to plot the maps I need county data, so now new query an instead of zips for cleanincome we do counties.
+
+I needed to get some geographic shape files and apparently these are combo files with .shpo .shx . etc etc etc and they all work togethor in software to load geographic plots. I then had to read the shp file as a dataframe in panbdas and merge it with my csv on zips. Apparently zipcodes are not typically easy to plot and they are very small. 
+The zipcode column in the shapfile is called: ZCTA5CE20
+https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.2020.html#list-tab-1883739534
+
+
+--------------------------
+GPT queries for code
+
+I have csv called data/clean_income.csv with columns zip,county,state_id,state_name,median_income,income_under_20_pop,income_over_20_pop. I also have csv called data/clean_iou.csv with columns zip,state,comm_rate,ind_rate,res_rate,res_rate_mod.
+I need python to read the two datframes then join them on zipcode. Then I need to group the resulting df by county. When grouping, we only need the county, res_rate, and median_income columns, and to get the grouped values just take the mean.
+
+I have a shapefile data/cb_2020_us_county_500k/cb_2020_us_county_500k.shp with STATEFP + COUNTYFP column corresponding to the county column in the joined df. So In order to join, the STATEFP and COUNTYFP columns need to be concatted.
+
+Also in order to join the csv and shapefile dataframes the join columns have to be the same data type, probably strings.
+
+Knowing that I need to save two jpegs of geo plots. One uses the res_rate as a scale to plot on the counties, county gets redder with increased res_rate. The other is median_income, counties get greener as income increases.
+
+Do not show the plots, just save the images.
+--
+
+I have a csv called iou_zipcodes_2020.csv and it includes these columns:
+zip,eiaid,utility_name,state,service_type,ownership,comm_rate,ind_rate,res_rate
+
+I need python to do the following using pandas library.
+
+Read the csv.
+
+I need all the repeated zip to be combined because the data is by zip and utility, I need it to just be zip. When grouping the rows to recalculate the rate columns just take the average of the group.
+
+Aditionally I need to remove the eiaid,utility_name,service_type,ownership columns
+
+Then I need to save the edited data frame.
+
+
+--
+I have a csv file called clean_iou.csv with columns zip,state,comm_rate,ind_rate,res_rate.
+
+I need a python program to read the csv and then create a histogram with the frequency of the res_rate column using binning of equal widths between the min and max.
+
+I need to save this histogram as a jpeg
+
+I also have a csv file called clean_income.csv with columns zip,state_id,state_name,median_income,income_under_20_pop,income_over_20_pop.
+
+I need a python program to read the csv and then create a histogram with the frequency of the median_income column using binning of equal widths between the min and max.
+
+I need to save this histogram as a jpeg
+
+Next I need join the two dataframes into one df joining on zip that ignores adding rows if there is not matching zip found.
+
+Then I need to use that df to create a scatterplot using res_rate as y axis and med_income as x axis.
+
+This scatterplot needs to be saved as a jpeg.
+
+--
+I have a csv called clean_income with fields zip,county,state_id,state_name,median_income,income_under_20_pop,income_over_20_pop.
+
+In python i need to create an intensity map of the United States with counties getting greener as median_income gets higher
+
+i need the plot to be saved as a jpeg
+--
+
+I have a csv file called clean_iou.csv with columns zip,state,comm_rate,ind_rate,res_rate.
+I also have a csv file called clean_income.csv with columns zip,state_id,state_name,median_income,income_under_20_pop,income_over_20_pop.
+
+I need to join these two data frames and run a correlation on res_rate column and median_income column
+
+--
+I have a csv file called clean_iou.csv with columns zip,state,comm_rate,ind_rate,res_rate.
+
+I also have a csv file called clean_income.csv with columns zip,state_id,state_name,median_income,income_under_20_pop,income_over_20_pop.
+
+I need a python program to read the csv's.
+
+Next I need join the two dataframes into one df joining on zip that ignores adding rows if there is not matching zip found.
+
+Then I need to use that df to create a scatterplot using zip code as x axis, median income as y axis and res_rate as the size of each point.
+
+I need a second scatterplot using income_uncer_20_pop as x axis, median_income as y axis and res_rate as size of point again.
+
+These scatterplots needs to be saved as 2 seperate jpeg.
+
+-------------------------
+query for personal income table
+
+select cast(zip as int) as zip, state_id, state_name, income_household_median,
+((sum(income_household_under_5,income_household_5_to_10,income_household_10_to_15,income_household_15_to_20))/100)*population as income_under_20_pop,
+((sum(income_household_20_to_25,income_household_25_to_35,income_household_35_to_50,income_household_50_to_75,income_household_75_to_100,income_household_100_to_150,income_household_150_over))/100)*population as income_over_20_pop
+from datamining.uszips where cast(zip as int) in (select zip from 2024S_zamanam.Utility);
+
+only including values that are not null for population
+
+We are working with over 20,000 records
+-----------------------------
+also need a scatter plot where x is zip, y is med income, size of point is res_rate
+
+should also calulate mean, med, quartiles, and standard deviation of res_rate and median income
+
+Had to join state and county fp to get full county fp, also convert both county columns in either df to strings filled with leading zeros of size 5. Otherwise county plot wouldn't work. Also used the lowest precision county division for ideal visual otherwise zip and even highly divided county is way too small for relevant presentation.
+
+Run correlation for each state individually, since policy tends to be state implemented not federal
+States with not many zipcodes such as delaware and vermont result in NaN correlation because there is too few data points to run func
+----------------------------
+references for intro of what other papers have studied, google scholar searching:
+
+study on pricing affecting consumers and delves more into the political involvement 
+https://books.google.com/books?hl=en&lr=&id=_wF3EAAAQBAJ&oi=fnd&pg=PA10&dq=utility+pricing&ots=qHPHqIxlW2&sig=kOaCE9Qg8YQkd-Oa6sVdYDZ4o1w#v=onepage&q=utility%20pricing&f=false
+
+theory of customer class demand patterns are manipulated by rate-of -return in a predictable way???
+https://www.sciencedirect.com/science/article/abs/pii/0148619587900038
+
+study looking at 20 years policy data 9180-2000 extrapolates as policy makers become privy to energy information they are more likeley to enact rate decreases than increases
+https://academic.oup.com/jleo/article-abstract/28/1/127/873572
+
+paper speaks on the roots of electric started in 1887 and how it followed demand and should not be affected by income level, also how fuel has big impact on electric prices,
+look at the conclusion, this really good paper
+https://www.jstor.org/stable/3145025?casa_token=CvIEbyFxMNYAAAAA%3AQM7PT2vqFOxWeZxvswHjavit_vycIWH5Ujj-eobMlqAvVFvRiEYcSW2IBC9mifu_XrrVbf886vWpeohi9U0e3goHhOFdTA0S6lSR69-x6EsNJbcONfYP&seq=2
+
